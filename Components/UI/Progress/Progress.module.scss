@@ -1,6 +1,204 @@
-.linear { --progress: 20%; width: min(100%, 404px); height: 12px; position: relative; overflow: hidden; display: block; .track { position: absolute; left: var(--progress); right: 0; top: 4px; height: 4px; border-radius: 2px; background: var(--secondary-container); }.wave { position: absolute; z-index: 1; left: 2px; top: 0; width: var(--progress); height: 12px; background: radial-gradient(20px 8px at 20px 12px, transparent 14px, var(--primary) 15px 18px, transparent 19px) 0 -6px / 40px 12px repeat-x; }.track + i { position: absolute; right: 0; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--primary); } }
-.indeterminate { --progress: 58%; .wave { animation: linearMove 1.6s var(--ease-emphasized) infinite; }.track { left: 0; }.track + i { display: none; } }
-.circular { width: 48px; height: 48px; overflow: visible; fill: none; transform: rotate(-90deg); }.circularTrack, .circularActive { stroke-width: 4; }.circularTrack { stroke: var(--secondary-container); }.circularActive { stroke: var(--primary); stroke-linecap: round; }.circularIndeterminate { animation: circularSpin 1.4s linear infinite; .circularActive { animation: circularSweep 1.4s var(--ease-emphasized) infinite; } }
-@keyframes linearMove { 0% { transform: translateX(-105%); } 100% { transform: translateX(175%); } }
-@keyframes circularSpin { to { transform: rotate(270deg); } }
-@keyframes circularSweep { 0% { stroke-dasharray: 5 95; } 50% { stroke-dasharray: 65 35; } 100% { stroke-dasharray: 5 95; stroke-dashoffset: -95; } }
+$sizes: (
+  xs: 1.5rem,
+  sm: 2.25rem,
+  md: 3.3125rem,
+  lg: 4rem,
+  xl: 5rem,
+);
+
+.root {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 14px;
+  padding: 0 0 0 4px;
+  overflow: hidden;
+}
+
+.rootDeterminate {
+  height: 14px;
+}
+
+.rootWave {
+  height: 14px;
+}
+
+.active {
+  flex: 0 0 auto;
+  height: 12px;
+  display: flex;
+  align-items: flex-start;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.standardBar {
+  height: 8px;
+  min-width: 40px;
+  border-radius: 4px;
+  background: var(--md-sys-color-primary, var(--primary));
+}
+
+.standardBarIndeterminate {
+  animation: m3-linear-standard-breathe 1.6s ease-in-out infinite alternate;
+}
+
+.waveStrip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  height: 12px;
+  width: max-content;
+  will-change: transform;
+  color: var(--md-sys-color-primary, var(--primary));
+}
+
+.waveStripIndeterminate {
+  animation: m3-linear-wave-drift 1.6s linear infinite;
+}
+
+.waveSegment {
+  display: block;
+  width: 40px;
+  height: 12px;
+  flex: 0 0 auto;
+  animation: m3-linear-wave-bob 1.6s ease-in-out infinite;
+  will-change: transform;
+  transform-origin: center;
+}
+
+.linearWaveSvg {
+  display: block;
+  width: 40px;
+  height: 12px;
+  overflow: visible;
+}
+
+.trackAndStop {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 12px;
+  overflow: hidden;
+}
+
+.track {
+  position: absolute;
+  height: 4px;
+  left: 0;
+  right: 0;
+  top: 4px;
+  background: var(--md-sys-color-secondary-container, var(--primary-container));
+  border-radius: 4px;
+}
+
+.stop {
+  position: absolute;
+  right: 0;
+  top: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--md-sys-color-primary, var(--primary));
+}
+
+.cpi {
+  --cpi-size: 3.3125rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--cpi-size);
+  height: var(--cpi-size);
+
+  @each $key, $val in $sizes {
+    &--#{$key} {
+      --cpi-size: #{$val};
+    }
+  }
+}
+
+.cpi__svg {
+  width: var(--cpi-size);
+  height: var(--cpi-size);
+  display: block;
+  overflow: visible;
+}
+
+.cpi__svg--spinning {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: m3-cpi-spin 1.2s linear infinite;
+}
+
+.cpi__track {
+  stroke: var(--md-sys-color-secondary-container, var(--primary-container));
+}
+
+.cpi__indicator {
+  stroke: var(--md-sys-color-primary, var(--primary));
+  will-change: d;
+}
+
+@keyframes m3-cpi-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpi__svg--spinning {
+    animation-duration: 4s;
+  }
+
+  .cpi__indicator {
+    opacity: 0.8;
+  }
+
+  .waveStripIndeterminate,
+  .waveSegment,
+  .standardBarIndeterminate {
+    animation: none;
+  }
+}
+
+@keyframes m3-linear-wave-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes m3-linear-wave-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes m3-linear-standard-breathe {
+  0% {
+    transform: scaleX(0.94);
+  }
+
+  100% {
+    transform: scaleX(1.02);
+  }
+}

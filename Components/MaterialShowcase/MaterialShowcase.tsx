@@ -70,7 +70,57 @@ export function MaterialShowcase() {
       </DemoBlock>
 
       <DemoBlock id="feedback" index="06" eyebrow="Feedback" title="Keep people informed" description="Progress and overlays appear at the right moment, explain system status, then get out of the way.">
-        <div className={styles.feedbackGrid}><div><h3>Progress & loading indicators</h3><div className={styles.progress}><CircularProgress /><LoadingIndicator /><LinearProgress /></div></div><div><h3>Overlays</h3><div className={styles.row}><Button variant="tonal" onClick={() => setDialog(true)}>Open dialog</Button><Button variant="outlined" onClick={() => { setSnackbar(true); window.setTimeout(() => setSnackbar(false), 3500); }}>Show snackbar</Button><Tooltip rich content="Rich tooltips can include longer supporting text and an optional action."><Button variant="text">Hover for tooltip</Button></Tooltip></div></div></div>
+        <div className={styles.feedbackGrid}>
+          <div>
+            <h3>Progress & loading indicators</h3>
+            <div className={styles.progressShowcase}>
+              <section className={styles.progressSection}>
+                <h4>Standard</h4>
+                <div className={styles.progressRow}>
+                  <div className={styles.progressCard}>
+                    <small>Circular determinate</small>
+                    <CircularProgress variant="standard" state="determinate" value={0.72} />
+                  </div>
+                  <div className={styles.progressCard}>
+                    <small>Circular indeterminate</small>
+                    <CircularProgress variant="standard" state="indeterminate" />
+                  </div>
+                </div>
+              </section>
+              <section className={styles.progressSection}>
+                <h4>Wavy</h4>
+                <div className={styles.progressRow}>
+                  <div className={styles.progressCard}>
+                    <small>Circular determinate</small>
+                    <CircularProgress variant="wavy" state="determinate" value={0.72} />
+                  </div>
+                  <div className={styles.progressCard}>
+                    <small>Circular indeterminate</small>
+                    <CircularProgress variant="wavy" state="indeterminate" />
+                  </div>
+                </div>
+              </section>
+              <section className={styles.progressSection}>
+                <h4>Other indicators</h4>
+                <div className={styles.progressSupport}>
+                  <div className={styles.progressCard}>
+                    <small>Loading indicator</small>
+                    <LoadingIndicator />
+                  </div>
+                  <div className={styles.progressCard}>
+                    <small>Linear standard</small>
+                    <LinearProgress state="indeterminate" appearance="standard" />
+                  </div>
+                  <div className={styles.progressCard}>
+                    <small>Linear wave</small>
+                    <LinearProgress state="indeterminate" appearance="wave" />
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+          <div><h3>Overlays</h3><div className={styles.row}><Button variant="tonal" onClick={() => setDialog(true)}>Open dialog</Button><Button variant="outlined" onClick={() => { setSnackbar(true); window.setTimeout(() => setSnackbar(false), 3500); }}>Show snackbar</Button><Tooltip rich content="Rich tooltips can include longer supporting text and an optional action."><Button variant="text">Hover for tooltip</Button></Tooltip></div></div>
+        </div>
       </DemoBlock>
 
       <DemoBlock id="pickers" index="07" eyebrow="Pickers" title="Pick a moment" description="Calendar surfaces keep date selection direct, readable and comfortable across pointer and touch input.">
