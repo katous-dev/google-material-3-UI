@@ -1,0 +1,4 @@
+import styles from "./Progress.module.scss";
+
+export function LinearProgress({ value }: { value?: number }) { return <div className={`${styles.linear} ${value === undefined ? styles.indeterminate : styles.determinate}`} role="progressbar" aria-valuenow={value} style={value === undefined ? undefined : { "--progress": `${value}%` } as React.CSSProperties}><span className={styles.wave} /><span className={styles.track} /><i /></div>; }
+export function CircularProgress({ value }: { value?: number }) { const progress = value ?? 28; return <svg className={`${styles.circular} ${value === undefined ? styles.circularIndeterminate : ""}`} role="progressbar" aria-valuenow={value} viewBox="0 0 48 48"><circle className={styles.circularTrack} cx="24" cy="24" r="20" /><circle className={styles.circularActive} cx="24" cy="24" r="20" pathLength="100" strokeDasharray={`${progress} ${100 - progress}`} /></svg>; }

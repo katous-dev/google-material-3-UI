@@ -1,0 +1,36 @@
+$spring: cubic-bezier(.34, 1.56, .64, 1);
+$standard: cubic-bezier(.2, 0, 0, 1);
+$accelerate: cubic-bezier(.3, 0, 1, 1);
+
+@mixin pressable($hover-scale: 1.03, $press-scale: .95, $rest-radius: null, $hover-radius: null, $press-radius: null) {
+  @if $rest-radius { border-radius: $rest-radius; }
+  transition:
+    transform 300ms $spring,
+    border-radius 300ms $spring,
+    background-color 140ms $standard,
+    box-shadow 180ms $standard,
+    color 140ms $standard;
+
+  &:hover:not(:disabled) {
+    transform: scale($hover-scale);
+    @if $hover-radius { border-radius: $hover-radius; }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale($press-scale);
+    @if $press-radius { border-radius: $press-radius; }
+    transition:
+      transform 120ms $accelerate,
+      border-radius 120ms $accelerate,
+      background-color 100ms $standard,
+      box-shadow 100ms $standard,
+      color 100ms $standard;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}

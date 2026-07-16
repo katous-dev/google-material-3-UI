@@ -1,0 +1,635 @@
+// ═══════════════════════════════════════════════════════════════
+//  Material 3 Expressive — Split Button
+//
+//  Từ hình:
+//    ① Variants : elevated | filled | tonal | outlined
+//    ② Sizes    : xs | sm | md | lg | xl
+//
+//  Cấu trúc: 
+//    [.split__action | divider | .split__dropdown]
+//    • action   → left outer corners rounded, right inner corners flat 
+//    • dropdown → left inner corners flat, right outer corners rounded
+//    • Mỗi half có state-layer + ripple độc lập
+//
+//  Motion: M3 Expressive spring (overshoot cubic-bezier)
+//  Đơn vị: rem (1rem = 16px)
+// ═══════════════════════════════════════════════════════════════
+
+// ── Design Tokens ──────────────────────────────────────────────
+:root {
+  // ── M3 Color palette ───────────────────────────────────────
+  --sp-primary: var(--primary);
+  --sp-on-primary: var(--on-primary);
+  --sp-primary-container: var(--primary-container);
+  --sp-on-primary-container: var(--on-primary-container);
+  --sp-secondary-container: var(--secondary-container);
+  --sp-on-secondary-container: var(--on-primary-container);
+  --sp-surface-container-low: var(--surface-container-low);
+  --sp-on-surface: var(--on-surface);
+  --sp-outline: var(--outline);
+  --sp-outline-variant: var(--outline-variant);
+  --sp-shadow: rgba(0, 0, 0, 0.15);
+
+  // ── Elevation ──────────────────────────────────────────────
+  --sp-elevation-1: 0 0.0625rem 0.125rem rgba(0, 0, 0, .3),
+    0 0.0625rem 0.1875rem 0.0625rem rgba(0, 0, 0, .15);
+  --sp-elevation-2: 0 0.0625rem 0.125rem rgba(0, 0, 0, .3),
+    0 0.125rem 0.375rem 0.125rem rgba(0, 0, 0, .15);
+
+  // ── State layers ───────────────────────────────────────────
+  --sp-state-hover: 0.08;
+  --sp-state-pressed: 0.12;
+  --sp-state-focus: 0.12;
+
+  // ── Motion — M3 Expressive ─────────────────────────────────
+  --sp-spring: cubic-bezier(0.34, 1.56, 0.64, 1); // overshoot → bounce
+  --sp-standard: cubic-bezier(0.2, 0, 0, 1);
+  --sp-accelerate: cubic-bezier(0.3, 0, 1, 1); // press-in nhanh
+
+  --sp-dur-fast: 100ms;
+  --sp-dur-normal: 250ms;
+  --sp-dur-slow: 450ms;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  CONTAINER
+// ─────────────────────────────────────────────────────────────
+.split {
+  display: inline-flex;
+  align-items: stretch;
+  position: relative;
+
+  // Không có gap — hai half liền sát nhau
+  gap: 2px;
+
+  // Transition của toàn container (box-shadow, v.v.)
+  transition: box-shadow var(--sp-dur-fast) var(--sp-standard);
+
+  // ── Disabled ──────────────────────────────────────────────
+  &--disabled {
+    opacity: 0.38;
+    pointer-events: none;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SHARED — action + dropdown chung
+// ─────────────────────────────────────────────────────────────
+%half-base {
+  // Reset
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+
+  // Layout
+  background-color: transparent;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
+
+  // Typography
+  font-family: "Google Sans", "Roboto Flex", "Roboto", system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.00625em;
+  line-height: 1;
+  white-space: nowrap;
+
+  // Transition — release state dùng spring
+  transition:
+    background-color var(--sp-dur-fast) var(--sp-standard),
+    color var(--sp-dur-fast) var(--sp-standard),
+    border-color var(--sp-dur-fast) var(--sp-standard),
+    border-radius var(--sp-dur-normal) var(--sp-spring),
+    transform var(--sp-dur-normal) var(--sp-spring);
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ACTION PART (left)
+//  • Outer corners (top-left, bottom-left) = rounded
+//  • Inner corners (top-right, bottom-right) = flat
+// ─────────────────────────────────────────────────────────────
+.split__action {
+  @extend %half-base;
+  gap: var(--sp-gap, 0.5rem);
+  padding-inline: var(--sp-action-padding, 1.25rem);
+  height: var(--sp-height, 2.5rem);
+  font-size: var(--sp-font-size, 0.875rem);
+  border-radius:
+    var(--sp-outer-radius) var(--sp-inner-radius) var(--sp-inner-radius) var(--sp-outer-radius);
+
+  // ── States ───────────────────────────────────────────────
+  &:hover:not(:disabled) {
+    transform: scale(1.01);
+    border-radius:
+      var(--sp-outer-hover-radius) var(--sp-inner-hover-radius) var(--sp-inner-hover-radius) var(--sp-outer-hover-radius);
+    .split__state {
+      opacity: var(--sp-state-hover);
+    }
+    .split__icon {
+      transform: rotate(-6deg) scale(1.08);
+    }
+  }
+
+  &:focus-visible .split__state {
+    opacity: var(--sp-state-focus);
+  }
+
+  // Press: squish corners + scale down — fast accelerate vào
+  &--pressed {
+   transform: scale(0.96) !important;
+    border-radius:
+      var(--sp-right-pressed-hover-radius) var(--sp-pressed-radius) var(--sp-pressed-radius) var(--sp-right-pressed-hover-radius) !important;
+    transition:
+      background-color var(--sp-dur-fast) var(--sp-standard),
+      border-radius var(--sp-dur-fast) var(--sp-accelerate),
+      transform var(--sp-dur-fast) var(--sp-accelerate) !important;
+
+    .split__state {
+      opacity: var(--sp-state-pressed);
+    }
+
+    .split__icon {
+      transform: scale(0.9) rotate(0deg);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  DROPDOWN PART (right)
+//  • Outer corners (top-right, bottom-right) = rounded
+//  • Inner corners (top-left, bottom-left) = flat
+// ─────────────────────────────────────────────────────────────
+.split__dropdown {
+  @extend %half-base;
+  padding-inline: var(--sp-dropdown-padding, 0.75rem);
+  height: var(--sp-height, 2.5rem);
+
+  border-radius:
+    var(--sp-inner-radius) var(--sp-outer-radius) var(--sp-outer-radius) var(--sp-inner-radius);
+
+  // ── States ───────────────────────────────────────────────
+  &:hover:not(:disabled) {
+    transform: scale(1.02);
+    border-radius:
+      var(--sp-right-outer-hover-radius) var(--sp-inner-hover-radius) var(--sp-inner-hover-radius) var(--sp-right-outer-hover-radius);
+    .split__state {
+      opacity: var(--sp-state-hover);
+    }
+
+    .split__chevron {
+      transform: translateY(0.1rem) scale(1.1);
+    }
+  }
+
+  &:focus-visible .split__state {
+    opacity: var(--sp-state-focus);
+  }
+
+   &--selected {
+      border-radius: var(--sp-selected-radius) !important;
+      transform: scale(1.03);
+
+      &:hover .split__chevron {
+        transform: translateY(-0.1rem) scale(1.1);
+      }
+  }
+
+  &--pressed {
+    transform: scale(0.94) !important;
+    border-radius:
+      var(--sp-pressed-radius) var(--sp-right-pressed-hover-radius) var(--sp-right-pressed-hover-radius) var(--sp-pressed-radius) !important;
+
+    transition:
+      background-color var(--sp-dur-fast) var(--sp-standard),
+      border-radius var(--sp-dur-fast) var(--sp-accelerate),
+      transform var(--sp-dur-fast) var(--sp-accelerate) !important;
+
+    .split__state {
+      opacity: var(--sp-state-pressed);
+    }
+
+    .split__chevron {
+      transform: translateY(0.125rem) scale(0.9);
+    }
+  }
+
+
+ 
+}
+
+// ─────────────────────────────────────────────────────────────
+//  SUB-ELEMENTS
+// ─────────────────────────────────────────────────────────────
+
+// State layer
+.split__state {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--sp-dur-fast) var(--sp-standard);
+}
+
+// Ripple container
+.split__ripple {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.split__ripple_wave {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(0);
+  animation: sp-ripple var(--sp-dur-slow) var(--sp-standard) forwards;
+}
+
+// Leading icon
+.split__icon {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--sp-icon-size, 1.125rem);
+  height: var(--sp-icon-size, 1.125rem);
+  transition:
+    transform var(--sp-dur-normal) var(--sp-spring),
+    color var(--sp-dur-fast) var(--sp-standard);
+
+  svg,
+  img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+// Label
+.split__label {
+  position: relative;
+  z-index: 1;
+}
+
+// Chevron icon
+.split__chevron {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sp-chevron-size, 1.25rem);
+  height: var(--sp-chevron-size, 1.25rem);
+  transition: transform var(--sp-dur-normal) var(--sp-spring);
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+// Menu surface anchored to the trailing edge of the split button.
+.split__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  min-width: max(12.5rem, 100%);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.125rem;
+  overflow: hidden;
+  border-radius: 1rem;
+  color: var(--sp-on-surface);
+  background: var(--surface-container);
+  box-shadow: 0 0.125rem 0.125rem rgba(0, 0, 0, .14), 0 0.1875rem 0.3125rem rgba(0, 0, 0, .12), 0 0.5rem 1.5rem rgba(0, 0, 0, .12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-0.75rem) scale(.72, .45);
+  transform-origin: top right;
+  transition:
+    opacity 100ms var(--sp-accelerate),
+    visibility 0s linear 210ms,
+    transform 210ms var(--sp-accelerate),
+    border-radius 210ms var(--sp-standard);
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    border-radius: 1.25rem;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity 90ms var(--sp-standard),
+      visibility 0s,
+      transform 340ms var(--sp-spring),
+      border-radius 340ms var(--sp-spring);
+  }
+}
+
+.split__menuItem {
+  --item-index: 0;
+  appearance: none;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0;
+  border-radius: 0.75rem;
+  color: var(--sp-on-surface);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(1.25rem) scale(.84);
+  transition:
+    opacity 80ms calc((2 - min(var(--item-index), 2)) * 18ms) var(--sp-accelerate),
+    transform 130ms calc((2 - min(var(--item-index), 2)) * 18ms) var(--sp-accelerate),
+    background-color 100ms var(--sp-standard),
+    border-radius 250ms var(--sp-spring);
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    outline: none;
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--on-surface) 8%, transparent);
+  }
+
+  &:active:not(:disabled) {
+    border-radius: 0.5rem;
+    transform: scale(.96) !important;
+  }
+
+  &:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+  }
+
+  &--destructive {
+    color: var(--error);
+  }
+}
+
+.split__menu--open .split__menuItem {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  transition-delay: calc(55ms + var(--item-index) * 28ms), calc(55ms + var(--item-index) * 28ms), 0ms, 0ms;
+  transition-timing-function: var(--sp-standard), var(--sp-spring), var(--sp-standard), var(--sp-spring);
+}
+
+.split__menuIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-items: center;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.split__menuLabel {
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.split__menuTrailing {
+  color: var(--outline);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ① VARIANTS
+// ─────────────────────────────────────────────────────────────
+
+// ELEVATED ────────────────────────────────────────────────────
+.split--elevated {
+  box-shadow: var(--sp-elevation-1);
+  border-radius: var(--sp-outer-radius);
+
+  &:hover {
+    box-shadow: var(--sp-elevation-2);
+  }
+
+  .split__action,
+  .split__dropdown {
+    background-color: var(--sp-surface-container-low);
+    color: var(--sp-primary);
+  }
+
+}
+
+// FILLED ──────────────────────────────────────────────────────
+.split--filled {
+
+  .split__action,
+  .split__dropdown {
+    background-color: var(--sp-primary);
+    color: var(--sp-on-primary);
+  }
+
+}
+
+// TONAL ───────────────────────────────────────────────────────
+.split--tonal {
+
+  .split__action,
+  .split__dropdown {
+    background-color: var(--sp-secondary-container);
+    color: var(--sp-on-secondary-container);
+  }
+
+}
+
+// OUTLINED ────────────────────────────────────────────────────
+.split--outlined {
+
+  .split__action,
+  .split__dropdown {
+    background-color: transparent;
+    color: var(--sp-primary);
+    // Outlined border dùng box-shadow để không ảnh hưởng layout
+    box-shadow: inset 0 0 0 0.0625rem var(--sp-outline);
+    transition:
+      background-color var(--sp-dur-fast) var(--sp-standard),
+      color var(--sp-dur-fast) var(--sp-standard),
+      box-shadow var(--sp-dur-fast) var(--sp-standard),
+      border-radius var(--sp-dur-normal) var(--sp-spring),
+      transform var(--sp-dur-normal) var(--sp-spring);
+  }
+
+  // Outlined: action right-border bị che bởi dropdown left-border
+}
+
+// ─────────────────────────────────────────────────────────────
+//  ② SIZES  — 5 cấu hình (Giữ nguyên MD làm chuẩn tuyệt đối)
+// ─────────────────────────────────────────────────────────────
+// XS ──────────────────────────────────────────────────────────
+.split--xs {
+  --sp-height: 1.75rem; // 28px
+  --sp-font-size: 0.6875rem; // 11px
+  --sp-gap: 0.25rem;
+  --sp-action-padding: 0.625rem; // 10px
+  --sp-dropdown-padding: 0.5rem; // 8px
+  --sp-icon-size: 0.875rem; // 14px
+  --sp-chevron-size: 1rem; // 16px
+
+  /* Tỷ lệ thu nhỏ từ MD xuống XS */
+  --sp-outer-radius: 999px;
+  --sp-inner-radius: 0.125rem; // Giữ phẳng theo note: xs/sm inner rất nhỏ
+  --sp-pressed-radius: 999px;
+  --sp-inner-hover-radius: 999px;
+  --sp-outer-hover-radius: 999px;
+
+  --sp-right-outer-hover-radius: 999px;
+  --sp-right-inner-hover-radius: 0.25rem;
+  --sp-right-pressed-hover-radius: 999px;
+
+  --sp-selected-radius: 999px;
+}
+
+// SM ──────────────────────────────────────────────────────────
+.split--sm {
+  --sp-height: 2rem; // 32px
+  --sp-font-size: 0.75rem; // 12px
+  --sp-gap: 0.375rem;
+  --sp-action-padding: 0.75rem; // 12px
+  --sp-dropdown-padding: 0.5625rem; // 9px
+  --sp-icon-size: 1rem; // 16px
+  --sp-chevron-size: 1.125rem; // 18px
+
+  /* Tỷ lệ thu nhỏ từ MD xuống SM */
+  --sp-outer-radius: 999px;
+  --sp-inner-radius: 0.125rem; // Giữ phẳng theo note: xs/sm inner rất nhỏ
+  --sp-pressed-radius: 999px;
+  --sp-inner-hover-radius: 999px;
+  --sp-outer-hover-radius: 999px;
+
+  --sp-right-outer-hover-radius: 999px;
+  --sp-right-inner-hover-radius: 0.3rem;
+  --sp-right-pressed-hover-radius: 999px;
+
+  --sp-selected-radius: 999px;
+}
+
+// MD (GIỮ NGUYÊN HOÀN TOÀN) ───────────────────────────────────
+.split--md {
+  --sp-height: 2.5rem; // 40px
+  --sp-font-size: 0.875rem; // 14px
+  --sp-gap: 0.5rem;
+  --sp-action-padding: 1.25rem; // 20px
+  --sp-dropdown-padding: 1rem; // 12px
+  --sp-icon-size: 1.125rem; // 18px
+  --sp-chevron-size: 1.25rem; // 20px
+
+  --sp-outer-radius: 62.5rem; // pill
+  --sp-inner-radius: 20rem; // 6px — flat ở giữa
+  --sp-pressed-radius: 40rem; // 14px
+  --sp-inner-hover-radius:  40rem; // 6px
+  --sp-outer-hover-radius:  70.5rem; // 6
+
+  --sp-right-outer-hover-radius: 25rem;
+  --sp-right-inner-hover-radius: 0.375rem;
+  --sp-right-pressed-hover-radius: 85rem;
+
+  --sp-selected-radius: 40rem;
+}
+
+// LG ──────────────────────────────────────────────────────────
+.split--lg {
+  --sp-height: 3.5rem; // 56px
+  --sp-font-size: 1.125rem; // 18px
+  --sp-gap: 0.625rem;
+  --sp-action-padding: 1.75rem; // 28px
+  --sp-dropdown-padding: 1rem; // 16px
+  --sp-icon-size: 1.375rem; // 22px
+  --sp-chevron-size: 1.5rem; // 24px
+
+  /* Tỷ lệ phóng to từ MD lên LG (x1.4) */
+  --sp-outer-radius: 87.5rem; 
+  --sp-inner-radius: 28rem; 
+  --sp-pressed-radius: 56rem; 
+  --sp-inner-hover-radius: 56rem; 
+  --sp-outer-hover-radius: 98.7rem; 
+
+  --sp-right-outer-hover-radius: 35rem;
+  --sp-right-inner-hover-radius: 0.525rem;
+  --sp-right-pressed-hover-radius: 119rem;
+
+  --sp-selected-radius: 56rem;
+}
+
+// XL ──────────────────────────────────────────────────────────
+.split--xl {
+  --sp-height: 5rem; // 80px
+  --sp-font-size: 1.5rem; // 24px
+  --sp-gap: 0.75rem;
+  --sp-action-padding: 2.25rem; // 36px
+  --sp-dropdown-padding: 1.5rem; // 24px
+  --sp-icon-size: 1.75rem; // 28px
+  --sp-chevron-size: 2rem; // 32px
+
+  /* Tỷ lệ phóng to từ MD lên XL (x2.0) */
+  --sp-outer-radius: 125rem; 
+  --sp-inner-radius: 40rem; 
+  --sp-pressed-radius: 80rem; 
+  --sp-inner-hover-radius: 80rem; 
+  --sp-outer-hover-radius: 141rem; 
+
+  --sp-right-outer-hover-radius: 50rem;
+  --sp-right-inner-hover-radius: 0.75rem;
+  --sp-right-pressed-hover-radius: 170rem;
+
+  --sp-selected-radius: 80rem;
+}
+
+// ─────────────────────────────────────────────────────────────
+//  KEYFRAMES
+// ─────────────────────────────────────────────────────────────
+@keyframes sp-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.2;
+  }
+
+  60% {
+    opacity: 0.08;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .split__menu,
+  .split__menuItem {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

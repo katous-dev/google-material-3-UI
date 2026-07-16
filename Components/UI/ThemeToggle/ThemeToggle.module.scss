@@ -1,0 +1,2 @@
+@use "../motion" as motion;
+.toggle { width: 100%; min-height: 48px; padding: 6px 12px; display: flex; align-items: center; gap: 12px; border: 1px solid var(--outline-variant); color: var(--on-surface); background: var(--surface-container); font-weight: 700; cursor: pointer; @include motion.pressable(1.025, .95, 16px, 20px, 10px); span { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 12px; color: var(--on-primary-container); background: var(--primary-container); } small { font-size: 12px; } }

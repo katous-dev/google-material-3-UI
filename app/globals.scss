@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+
+:root {
+  color-scheme: light;
+  --primary: #5f5791;
+  --on-primary: #ffffff;
+  --primary-container: #e6deff;
+  --on-primary-container: #1b143f;
+  --secondary: #615b6f;
+  --secondary-container: #e7def8;
+  --tertiary: #7d5260;
+  --surface: #fdf8ff;
+  --surface-container-low: #f7f2fa;
+  --surface-container: #f1ecf4;
+  --surface-container-high: #ebe6ee;
+  --surface-container-highest: #e5e1e8;
+  --on-surface: #1c1b20;
+  --on-surface-variant: #48454e;
+  --outline: #79747e;
+  --outline-variant: #cac4d0;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --inverse-surface: #322f35;
+  --inverse-on-surface: #f5eff7;
+  --inverse-primary: #cec2ff;
+  --support-green: #d7eddb;
+  --support-green-strong: #4f8d65;
+  --support-yellow: #f6c76a;
+  --support-pink: #ffdadf;
+  --hero-glow: #e7f4e8;
+  --glass-surface: rgb(255 255 255 / .82);
+  --shadow: 29 27 32;
+  --ease-emphasized: cubic-bezier(.2, 0, 0, 1);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary: #cec2ff;
+  --on-primary: #30275f;
+  --primary-container: #474075;
+  --on-primary-container: #e6deff;
+  --secondary: #cbc2dc;
+  --secondary-container: #494454;
+  --tertiary: #efb8c8;
+  --surface: #141318;
+  --surface-container-low: #1c1b20;
+  --surface-container: #211f26;
+  --surface-container-high: #2b2930;
+  --surface-container-highest: #36343b;
+  --on-surface: #e6e1e9;
+  --on-surface-variant: #cac4d0;
+  --outline: #938f99;
+  --outline-variant: #49454f;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --inverse-surface: #e6e1e9;
+  --inverse-on-surface: #313036;
+  --inverse-primary: #5f5791;
+  --support-green: #294a37;
+  --support-green-strong: #9bd3ad;
+  --support-yellow: #6d5824;
+  --support-pink: #633b47;
+  --hero-glow: #21392a;
+  --glass-surface: rgb(43 41 48 / .88);
+  --shadow: 0 0 0;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  color: var(--on-surface);
+  background: var(--surface);
+  font-family: "Manrope", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: color 240ms var(--ease-emphasized), background-color 240ms var(--ease-emphasized);
+}
+
+button, input { font: inherit; }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+
+::selection { background: var(--primary-container); color: var(--on-primary-container); }
+
+*:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 55%, transparent); outline-offset: 3px; }
