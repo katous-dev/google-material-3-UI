@@ -1,20 +1,7 @@
 "use client";
 
-import React, { useEffect, useId, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "./Progress.module.scss";
-
-export type LinearProgressVariant = "determinate" | "indeterminate";
-
-export interface LinearProgressIndicatorProps {
-  variant?: LinearProgressVariant;
-  state?: LinearProgressVariant;
-  appearance?: "standard" | "wave";
-  value?: number;
-  trackVisible?: boolean;
-  stopIndicator?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-}
 
 export type CpiSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type CpiVariant = "wavy" | "standard";
@@ -27,23 +14,6 @@ export interface CircularProgressIndicatorProps {
   spinning?: boolean;
   className?: string;
   "aria-label"?: string;
-}
-
-const LINEAR_VIEWBOX_WIDTH = 404;
-const LINEAR_VIEWBOX_HEIGHT = 14;
-const LINEAR_TILE_WIDTH = 40;
-const LINEAR_TILE_HEIGHT = 12;
-const LINEAR_WAVE_TILE_D =
-  "M6.05859 3.57003C4.16427 2.43344 1.70723 3.0477 0.570641 4.94202C-0.565952 6.83634 0.0483055 9.29338 1.94263 10.43L4.00061 7L6.05859 3.57003ZM24.0006 7L21.9426 3.57003C17.0542 6.50311 10.9471 6.50311 6.05859 3.57003L4.00061 7L1.94263 10.43C9.36456 14.8831 18.6367 14.8831 26.0586 10.43L24.0006 7ZM24.0006 7L26.0586 10.43C30.9471 7.49689 37.0542 7.49689 41.9426 10.43L44.0006 7L46.0586 3.57003C38.6367 -0.883127 29.3646 -0.883127 21.9426 3.57003L24.0006 7Z";
-
-function LinearWaveTile({ delay }: { delay: number }) {
-  return (
-    <span className={styles.waveSegment} style={{ animationDelay: `${delay}ms` }}>
-      <svg className={styles.linearWaveSvg} viewBox="0 0 48 12" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d={LINEAR_WAVE_TILE_D} fill="currentColor" />
-      </svg>
-    </span>
-  );
 }
 
 const CX = 50;
@@ -104,60 +74,6 @@ function smoothArcPath(tailDeg: number, sweep: number): string {
   const tail = (tailDeg - 90) * (Math.PI / 180);
   const head = (tailDeg + sweep - 90) * (Math.PI / 180);
   return `M${(CX + R * Math.cos(tail)).toFixed(2)},${(CY + R * Math.sin(tail)).toFixed(2)} A${R},${R} 0 ${sweep > 180 ? 1 : 0} 1 ${(CX + R * Math.cos(head)).toFixed(2)},${(CY + R * Math.sin(head)).toFixed(2)}`;
-}
-
-export function LinearProgress({
-  variant = "determinate",
-  state,
-  appearance = "standard",
-  value = 0,
-  trackVisible = true,
-  stopIndicator = true,
-  className,
-  style,
-}: LinearProgressIndicatorProps) {
-  const mode = state ?? variant;
-  const clamped = Math.min(100, Math.max(0, value));
-  const isIndeterminate = mode === "indeterminate";
-  const activePercent = appearance === "wave"
-    ? (isIndeterminate ? 50 : clamped)
-    : (isIndeterminate ? 20 : clamped);
-  const tileCount = appearance === "wave"
-    ? Math.max(2, Math.ceil((activePercent / 100) * (LINEAR_VIEWBOX_WIDTH / LINEAR_TILE_WIDTH)) + 1)
-    : 1;
-  const rootClass = appearance === "wave" ? styles.rootWave : styles.rootDeterminate;
-
-  return (
-    <div
-      className={[
-        styles.root,
-        rootClass,
-        className,
-      ].filter(Boolean).join(" ")}
-      role="progressbar"
-      aria-valuenow={!isIndeterminate ? clamped : undefined}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      style={style}
-    >
-      <div className={styles.active} style={{ flexBasis: `${activePercent}%` }}>
-        {appearance === "wave" ? (
-          <div className={[styles.waveStrip, isIndeterminate && styles.waveStripIndeterminate].filter(Boolean).join(" ")}>
-            {Array.from({ length: tileCount }, (_, index) => (
-              <LinearWaveTile key={index} delay={index * 110} />
-            ))}
-          </div>
-        ) : (
-          <div className={[styles.standardBar, isIndeterminate && styles.standardBarIndeterminate].filter(Boolean).join(" ")} />
-        )}
-      </div>
-
-      <div className={styles.trackAndStop}>
-        {trackVisible && <div className={styles.track} />}
-        {stopIndicator && <div className={styles.stop} />}
-      </div>
-    </div>
-  );
 }
 
 export const CircularProgress = React.memo<CircularProgressIndicatorProps>(

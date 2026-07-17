@@ -1,0 +1,270 @@
+// ═══════════════════════════════════════════════════════════════
+//  Material 3 Expressive ToggleButton — importer từ mt3-gg-UI-master
+//  Khác ToggleButton gốc:
+//    - Hỗ trợ cả controlled & uncontrolled
+//    - role="checkbox" + aria-checked (đúng chuẩn a11y cho toggle)
+//    - Animation icon khi toggle (scale + rotate spring)
+//    - Shape morph: border-radius thay đổi khi select
+//  Tokens wrap trong .toggle để không xung đột với ToggleButton gốc
+// ═══════════════════════════════════════════════════════════════
+
+.toggle {
+  // ── Tokens (color) — đồng bộ với CSS variables của project chính ──
+  // UNSELECTED: ghost nhạt dùng secondary-container (giống các toggle/button ghost khác)
+  --toggle-unsel-bg:       var(--secondary-container);
+  --toggle-unsel-color:    var(--on-surface-variant);
+  --toggle-unsel-ripple:   var(--on-surface-variant);
+
+  // SELECTED: dùng primary (giống các filled button khác)
+  --toggle-sel-bg:         var(--primary);
+  --toggle-sel-color:      var(--on-primary);
+  --toggle-sel-ripple:     var(--on-primary);
+
+  // ── Tokens (shape) ──────────────────────────────────────────
+  --toggle-radius:          1.25rem;
+  --toggle-radius-pressed:  0.5rem;
+  --toggle-radius-hover:    0.875rem;
+  --toggle-radius-selected: 0.875rem;
+
+  // ── Tokens (size) ───────────────────────────────────────────
+  --toggle-height:          2.5rem;
+  --toggle-padding-inline:  1.25rem;
+  --toggle-gap:             0.5rem;
+  --toggle-font-size:       0.875rem;
+  --toggle-icon-size:       1.125rem;
+
+  // ── Tokens (motion) ─────────────────────────────────────────
+  --toggle-spring:          cubic-bezier(0.34, 1.56, 0.64, 1);
+  --toggle-standard:        cubic-bezier(0.2, 0, 0, 1);
+  --toggle-accelerate:      cubic-bezier(0.3, 0, 1, 1);
+
+  --toggle-dur-fast:        120ms;
+  --toggle-dur-normal:      280ms;
+  --toggle-dur-slow:        420ms;
+
+  // ── Reset ───────────────────────────────────────────────────
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  text-decoration: none;
+
+  // ── Layout ──────────────────────────────────────────────────
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-sizing: border-box;
+
+  height:         var(--toggle-height);
+  padding-inline: var(--toggle-padding-inline);
+  gap:            var(--toggle-gap);
+
+  // ── Typography ──────────────────────────────────────────────
+  font-family:    "Google Sans", "Roboto Flex", "Roboto", system-ui, sans-serif;
+  font-size:      var(--toggle-font-size);
+  font-weight:    500;
+  letter-spacing: 0.00625em;
+  line-height:    1;
+  white-space:    nowrap;
+
+  // ── UNSELECTED (default) ───────────────────────────────────
+  background-color: var(--toggle-unsel-bg);
+  color:            var(--toggle-unsel-color);
+  border-radius:    var(--toggle-radius);
+
+  transition:
+    background-color var(--toggle-dur-fast)    var(--toggle-standard),
+    color            var(--toggle-dur-fast)     var(--toggle-standard),
+    border-radius    var(--toggle-dur-normal)   var(--toggle-spring),
+    transform        var(--toggle-dur-normal)   var(--toggle-spring);
+
+  // ── Sub-elements ────────────────────────────────────────────
+
+  &__state {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--toggle-dur-fast) var(--toggle-standard);
+  }
+
+  &__ripple {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  &__ripple_wave {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    transform: scale(0);
+    animation: toggle-ripple var(--toggle-dur-slow) var(--toggle-standard) forwards;
+  }
+
+  &__icon {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width:  var(--toggle-icon-size);
+    height: var(--toggle-icon-size);
+    transition:
+      transform var(--toggle-dur-normal) var(--toggle-spring),
+      color     var(--toggle-dur-fast)   var(--toggle-standard);
+
+    svg, img { width: 100%; height: 100%; display: block; }
+  }
+
+  &__label {
+    position: relative;
+    z-index: 1;
+    transition: color var(--toggle-dur-fast) var(--toggle-standard);
+  }
+
+  // ── States: UNSELECTED ──────────────────────────────────────
+
+  &:hover:not(:disabled):not(.toggle--selected) {
+    transform: scale(1.03);
+    border-radius: var(--toggle-radius-hover);
+    .toggle__state { opacity: 0.06; }
+  }
+
+  &:focus-visible:not(.toggle--selected) .toggle__state { opacity: 0.1; }
+
+  // ── SELECTED ────────────────────────────────────────────────
+  &--selected {
+    background-color: var(--toggle-sel-bg);
+    color:            var(--toggle-sel-color);
+
+    // Shape morph khi select
+    border-radius: calc(var(--toggle-radius) - 0.3rem);
+
+    .toggle__icon {
+      animation: toggle-icon-in var(--toggle-dur-normal) var(--toggle-spring) both;
+    }
+
+    &:hover:not(:disabled) {
+      transform: scale(1.03);
+      border-radius: calc(var(--toggle-radius-hover) - 0.125rem);
+      .toggle__state { opacity: 0.08; }
+    }
+
+    &:focus-visible .toggle__state { opacity: 0.12; }
+  }
+
+  // ── PRESSED ─────────────────────────────────────────────────
+  &--pressed {
+    transform: scale(0.95) !important;
+    border-radius: var(--toggle-radius-pressed) !important;
+
+    transition:
+      background-color var(--toggle-dur-fast) var(--toggle-standard),
+      color            var(--toggle-dur-fast) var(--toggle-standard),
+      border-radius    var(--toggle-dur-fast) var(--toggle-accelerate),
+      transform        var(--toggle-dur-fast) var(--toggle-accelerate) !important;
+
+    .toggle__state  { opacity: 0.12; }
+    .toggle__icon   { animation: none; transform: scale(0.88); }
+  }
+
+  // ── Disabled ────────────────────────────────────────────────
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+    pointer-events: none;
+  }
+
+  // ── Sizes ───────────────────────────────────────────────────
+
+  &--xs {
+    --toggle-radius:          0.875rem;
+    --toggle-radius-pressed:  0.35rem;
+    --toggle-radius-hover:    0.6125rem;
+    --toggle-radius-selected: 0.6125rem;
+    --toggle-height:          1.75rem;
+    --toggle-padding-inline:  0.875rem;
+    --toggle-gap:             0.35rem;
+    --toggle-font-size:       0.6125rem;
+    --toggle-icon-size:       0.7875rem;
+  }
+
+  &--sm {
+    --toggle-radius:          1rem;
+    --toggle-radius-pressed:  0.4rem;
+    --toggle-radius-hover:    0.7rem;
+    --toggle-radius-selected: 0.7rem;
+    --toggle-height:          2rem;
+    --toggle-padding-inline:  1rem;
+    --toggle-gap:             0.4rem;
+    --toggle-font-size:       0.7rem;
+    --toggle-icon-size:       0.9rem;
+  }
+
+  &--md {
+    --toggle-radius:          1.25rem;
+    --toggle-radius-pressed:  0.5rem;
+    --toggle-radius-hover:    0.875rem;
+    --toggle-radius-selected: 0.875rem;
+    --toggle-height:          2.5rem;
+    --toggle-padding-inline:  1.25rem;
+    --toggle-gap:             0.5rem;
+    --toggle-font-size:       0.875rem;
+    --toggle-icon-size:       1.125rem;
+  }
+
+  &--lg {
+    --toggle-radius:          1.5rem;
+    --toggle-radius-pressed:  0.6rem;
+    --toggle-radius-hover:    1.05rem;
+    --toggle-radius-selected: 1.05rem;
+    --toggle-height:          3rem;
+    --toggle-padding-inline:  1.5rem;
+    --toggle-gap:             0.6rem;
+    --toggle-font-size:       1.05rem;
+    --toggle-icon-size:       1.35rem;
+  }
+
+  &--xl {
+    --toggle-radius:          1.75rem;
+    --toggle-radius-pressed:  0.7rem;
+    --toggle-radius-hover:    1.225rem;
+    --toggle-radius-selected: 1.225rem;
+    --toggle-height:          3.5rem;
+    --toggle-padding-inline:  1.75rem;
+    --toggle-gap:             0.7rem;
+    --toggle-font-size:       1.225rem;
+    --toggle-icon-size:       1.575rem;
+  }
+}
+
+// ── Keyframes ──────────────────────────────────────────────────
+@keyframes toggle-ripple {
+  0%   { transform: scale(0); opacity: 0.18; }
+  60%  {                       opacity: 0.08; }
+  100% { transform: scale(1); opacity: 0;    }
+}
+
+@keyframes toggle-icon-in {
+  0%   { transform: scale(0.7)  rotate(-20deg); opacity: 0.6; }
+  55%  { transform: scale(1.25) rotate(8deg);   opacity: 1;   }
+  80%  { transform: scale(0.92) rotate(-3deg);               }
+  100% { transform: scale(1)    rotate(0deg);                }
+}
+
+@keyframes toggle-icon-out {
+  0%   { transform: scale(1.1)  rotate(10deg); }
+  100% { transform: scale(0.85) rotate(0deg);  opacity: 0.7; }
+}

@@ -1,0 +1,201 @@
+/* ---- Root container (khớp Figma auto-layout) ---- */
+.root {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 12px;
+  padding-left: 4px;
+  overflow: visible;
+  contain: layout paint;
+  transform: translateZ(0);
+}
+
+.rootDeterminate {
+  height: 12px;
+}
+
+.rootWave {
+  height: 12px;
+}
+
+/* ---- Stop indicator (8×8px, primary, radius 3px) — ĐỨNG YÊN ở mép phải ----
+   right: 0 cố định. KHÔNG animate. Là "đích" cố định của progress. */
+.stop {
+  position: absolute;
+  top: calc(50% - 4px);
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--md-sys-color-primary, var(--primary));
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 2;
+  contain: layout paint;
+}
+
+/* ---- Track (animate left + right = 0 cố định, thu hẹp theo value) ----
+   Khi value=100% → left = 4 + (W - 16) + 4 = W - 8 → track.right_edge = W - 8 (chạm stop).
+   Khi value=0% → left = 4 → track full width = W - 4 (chiếm toàn bộ sau padding).
+   Cùng transition timing active → đồng bộ tốc độ. */
+.track {
+  position: absolute;
+  top: calc(50% - 4px);
+  left: 0; /* fallback */
+  right: 0;
+  height: 8px;
+  background: var(--md-sys-color-secondary-container, var(--primary-container));
+  border-radius: 4px;
+  transition: left 250ms cubic-bezier(0.4, 0, 0.6, 1);
+  will-change: left;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+/* ---- Active indicator (animate width → pill tròn ở mọi value) ----
+   width set inline = (100% - 4 - 8 - 4) * value = (100% - 16px) * value.
+   Max width = 100% - 16px → khi value=100% KHÔNG đè lên stop (cách đúng GAP_PX).
+   border-radius: 4px scale theo width tự nhiên → pill tròn, KHÔNG méo như scaleX. */
+.activeIndicator {
+  position: absolute;
+  top: calc(50% - 4px);
+  left: 4px;
+  height: 8px;
+  width: 0; /* fallback */
+  background: var(--md-sys-color-primary, var(--primary));
+  border-radius: 4px;
+  transition: width 250ms cubic-bezier(0.4, 0, 0.6, 1);
+  will-change: width;
+  pointer-events: none;
+  contain: layout paint;
+}
+
+/* Indeterminate: width GPU-accelerated + vị trí cố định 25%.
+   Dùng transform: scaleX + translateX → mượt, KHÔNG transition (animation điều khiển). */
+.activeIndicatorIndeterminate {
+  width: 25%;
+  animation: m3-linear-active-slide 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: none;
+}
+
+/* ---- Wave variants ----
+   Cấu trúc GIỐNG Standard: 3 absolute children (active + track + stop).
+   Active dùng SVG path sine vẽ bằng requestAnimationFrame (mỗi frame cập nhật `d`
+   → "sống" như Circular determinate). */
+
+.activeIndicatorWave {
+  /* Active wave: trong suốt (không fill nền), SVG con vẽ stroke sine path. */
+  background: transparent;
+  /* Bỏ border-radius (stroke path tự bo theo sine). */
+  border-radius: 0;
+}
+
+/* SVG wave bên trong activeIndicator: fill 100% active, preserveAspectRatio none
+   để path tự kéo dài theo width active. */
+.waveSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Path stroke: primary color, độ dày ~3.4 (bám theo circular STROKE_W). */
+.waveSvgPath {
+  stroke: var(--md-sys-color-primary, var(--primary));
+  stroke-width: 3.4;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Wave segment legacy (giữ cho LinearWaveTile fallback nếu có ai dùng) */
+.waveSegment {
+  display: block;
+  width: 40px;
+  height: 12px;
+  flex: 0 0 auto;
+  will-change: transform;
+  transform-origin: center;
+}
+
+.linearWaveSvg {
+  display: block;
+  width: 40px;
+  height: 12px;
+  overflow: visible;
+}
+
+/* Indeterminate wave: width 25% + drift ngang (translateX) + bob nhẹ */
+.activeIndicatorWaveIndeterminate {
+  width: 25% !important;
+  animation: m3-linear-wave-drift 1.6s linear infinite;
+}
+
+.waveStrip {
+  /* legacy: không dùng trong layout mới */
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  height: 12px;
+  width: 100%;
+  flex: 0 0 auto;
+  min-width: 40px;
+  color: var(--md-sys-color-primary, var(--primary));
+}
+
+.waveStripIndeterminate {
+  animation: m3-linear-wave-drift 1.6s linear infinite;
+}
+
+.waveBob {
+  animation: m3-linear-wave-bob 1.6s ease-in-out infinite;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .activeIndicator,
+  .track,
+  .stop {
+    transition: none;
+  }
+
+  .activeIndicatorIndeterminate,
+  .activeIndicatorWaveIndeterminate,
+  .waveStripIndeterminate,
+  .waveSegment {
+    animation: none;
+  }
+}
+
+/* ---- Keyframes ---- */
+@keyframes m3-linear-active-slide {
+  0% {
+    transform: translateX(-100%) scaleX(0.5);
+  }
+
+  100% {
+    transform: translateX(300%) scaleX(0.5);
+  }
+}
+
+@keyframes m3-linear-wave-drift {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-40px);
+  }
+}
+
+@keyframes m3-linear-wave-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-1px);
+  }
+}

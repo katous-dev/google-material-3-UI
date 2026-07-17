@@ -1,2 +1,321 @@
 @use "../motion" as motion;
-.wrap { min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 8px; }.actions { display: grid; justify-items: end; gap: 4px; button { height: 56px; padding: 0 24px; display: flex; align-items: center; gap: 10px; border: 0; color: var(--on-primary-container); background: var(--primary-container); box-shadow: 0 2px 5px rgb(var(--shadow) / .18); font-weight: 700; cursor: pointer; opacity: 0; pointer-events: none; transform: translateY(20px) scale(.8); @include motion.pressable(1.035, .94, 28px, 34px, 15px); transition-delay: calc(var(--delay) * 45ms); } }.fab { width: 56px; height: 56px; display: grid; place-items: center; border: 0; color: var(--on-primary-container); background: var(--primary-container); box-shadow: 0 4px 8px 3px rgb(0 0 0 / .15), 0 1px 3px rgb(0 0 0 / .3); cursor: pointer; @include motion.pressable(1.06, .9, 18px, 28px, 12px); }.open { .actions button { opacity: 1; pointer-events: auto; transform: none; }.fab { border-radius: 50%; transform: rotate(90deg); &:hover { transform: rotate(90deg) scale(1.06); } &:active { transform: rotate(90deg) scale(.9); } } }
+
+// ── Direction & placement modifiers ───────────────────────────────
+// DOM order: Edit (đầu) → Share → Delete (cuối) → FAB (sau actions)
+// Khi menu mở "up" (lên trên) thì thứ tự phải là:
+//   Edit (top) → Share → Delete → FAB (bottom)
+// Vì wrap dùng flex column với justify-end nên items đầu DOM sẽ ở TOP.
+// → KHÔNG cần reverse. Render "up" chỉ là slide animation direction.
+// Default = "up" để giữ Material 3 spec.
+.dir-up     .actions { flex-direction: column; }
+.dir-down   .actions { flex-direction: column-reverse; }
+.dir-left   .actions { flex-direction: row; }
+.dir-right  .actions { flex-direction: row-reverse; }
+
+// ── Wrap ─────────────────────────────────────────────────────────
+// FAB là element trong flow (relative). Menu layer là absolute,
+// expand theo FAB anchor. FAB không bao giờ di chuyển vì nó là
+// element duy nhất trong flow.
+// ── Wrap ─────────────────────────────────────────────────────────
+.wrap {
+  position: relative;
+  // FAB width = 56px → wrap luôn 56px (menu layer absolute không ảnh hưởng)
+  width: 56px;
+  min-height: 56px;
+  // Padding-top để FAB không đụng label bên trên
+  padding-top: 0;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+// FAB — element trong flow, là anchor. Vị trí theo align của wrap.
+.fab {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  z-index: 2;
+}
+
+// Menu layer — absolute, expand theo FAB. dir-up mặc định (trên FAB)
+.menu {
+  position: absolute;
+  bottom: calc(100% + 8px); // 100% = FAB height, +8 gap
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--menu-standard);
+}
+// Default align-right
+.menu { right: 0; align-items: flex-end; }
+
+// Align variants cho menu
+.align-left .menu  { left: 0; right: auto; align-items: flex-start; }
+.align-center .menu { left: 50%; right: auto; transform: translateX(-50%); align-items: center; }
+
+// Direction variants — đổi vị trí menu relative FAB
+.dir-down .menu {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+.dir-left .menu {
+  right: calc(100% + 8px);
+  bottom: 0;
+  top: auto;
+  flex-direction: row;
+}
+.dir-right .menu {
+  left: calc(100% + 8px);
+  bottom: 0;
+  top: auto;
+  flex-direction: row-reverse;
+}
+
+// Khi mở → menu bung ra với spring animation
+.open .menu {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// ── Actions container ───────────────────────────────────────────
+// (đã chuyển lên trên)
+
+// ── Action button ────────────────────────────────────────────────
+.action {
+  position: relative;
+  overflow: hidden;
+  height: 56px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 28px;
+  color: var(--on-primary-container);
+  background: var(--primary-container);
+  box-shadow: 0 2px 5px rgb(var(--shadow) / .18);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+
+  // Initial state — collapsed (parent .menu handles opacity)
+  transform: translateY(20px) scale(.6);
+  opacity: 0;
+
+  // Spring bounce + smooth — giống Button variants
+  --action-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --action-standard: cubic-bezier(0.2, 0, 0, 1);
+  --action-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  transition:
+    opacity 200ms var(--action-standard),
+    transform 420ms var(--action-spring),
+    border-radius 320ms var(--action-spring),
+    background-color 180ms var(--action-standard),
+    box-shadow 180ms var(--action-standard),
+    color 140ms var(--action-standard);
+
+  transition-delay: calc(var(--delay) * 60ms);
+
+  // Pressable for hover/active states — nhẹ hơn (scale 0.98 thay vì 0.94)
+  @include motion.pressable(1.025, .98, 28px, 22px, 12px);
+
+  svg, img { width: 18px; height: 18px; flex-shrink: 0; position: relative; z-index: 1; transition: transform 320ms var(--action-spring); }
+  span { position: relative; z-index: 1; }
+
+  // ── State layer (hover/focus) — giống Button ────────────────
+  .state {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms var(--action-standard);
+  }
+
+  // ── Ripple layer (giống Button) ────────────────────────────
+  .ripples {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    transform: scale(0);
+    animation: fab-action-ripple 600ms var(--action-standard) forwards;
+  }
+
+  // ── Hover — shape morph (border-radius thay đổi) + scale nhẹ ──
+  &:hover:not(:disabled):not(.actionDisabled):not(:active) {
+    border-radius: 20px;
+    transform: scale(1.025);
+    .state { opacity: .08; }
+    svg { transform: rotate(-7deg) scale(1.08); }
+  }
+  &:focus-visible {
+    border-radius: 20px;
+    .state { opacity: .12; }
+  }
+  // ── Active — giữ ripple, scale nhẹ (chỉ button đang được nhấn) ─
+  &:active:not(:disabled):not(.actionDisabled) {
+    border-radius: 18px;
+    transform: scale(0.98);
+    .state { opacity: .16; }
+  }
+
+  // ── States ──────────────────────────────────────────────────
+  &.actionDisabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  &.actionDestructive {
+    color: var(--on-error);
+    background: var(--error);
+  }
+}
+
+@keyframes fab-action-ripple {
+  0%   { opacity: .2; transform: scale(0); }
+  60%  { opacity: .08; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+// ── Opened state — slide out với hiệu ứng lò xo ──────────────────
+// transition trên .action đã dùng --action-spring (overshoot bounce).
+// Combined với transition-delay per-item → tạo cascading spring effect.
+.open .action {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+// ── Pressing state — vô hiệu hover trên TẤT CẢ button khi 1 nút đang được nhấn ─
+// Tránh hiệu ứng "sáng" lan sang các button khác (đặc biệt khi menu chuẩn bị đóng).
+.pressing .action:hover {
+  border-radius: 28px; // reset morph về rest
+  transform: none; // reset scale về rest (giữ collapse transform ban đầu)
+  .state { opacity: 0 !important; }
+  svg { transform: none; }
+}
+
+// ── FAB trigger ─────────────────────────────────────────────────
+.fab {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 18px;
+  color: var(--on-primary-container);
+  background: var(--primary-container);
+  box-shadow: 0 4px 8px 3px rgb(0 0 0 / .15), 0 1px 3px rgb(0 0 0 / .3);
+  cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  // Spring bounce như Split button — cubic-bezier(0.34, 1.56, 0.64, 1)
+  --fab-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --fab-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  transition:
+    transform 320ms var(--fab-spring),
+    border-radius 320ms var(--fab-spring),
+    background-color 200ms var(--fab-standard),
+    box-shadow 200ms var(--fab-standard);
+
+  @include motion.pressable(1.06, .9, 18px, 28px, 12px);
+
+  // Icon SVG — xoay 135deg khi mở để biến + thành ×
+  .fabIcon {
+    position: relative;
+    z-index: 1;
+    display: inline-grid;
+    place-items: center;
+    transition: transform 320ms var(--fab-spring);
+    transform: rotate(0deg);
+
+    svg { width: 24px; height: 24px; display: block; }
+  }
+
+  // ── State layer (hover/focus) — giống Button ────────────────
+  .state {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms var(--fab-standard);
+  }
+
+  // ── Ripple layer (giống Button) ────────────────────────────
+  .ripples {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0;
+    transform: scale(0);
+    animation: fab-ripple 600ms var(--fab-standard) forwards;
+  }
+
+  &:hover:not(:disabled) .state { opacity: .08; }
+  &:focus-visible .state { opacity: .12; }
+}
+
+// ── Open state — icon rotate thành X, FAB bo tròn ───────────────
+.open .fab {
+  border-radius: 50%;
+  background: var(--secondary-container);
+
+  // Icon xoay 135deg: + → ×
+  .fabIcon,
+  .fabIcon svg {
+    transform: rotate(135deg);
+  }
+}
+
+@keyframes fab-ripple {
+  0%   { opacity: .2; transform: scale(0); }
+  60%  { opacity: .08; }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+// ── Direction-specific tweaks — collapsed state ──────────────────
+.dir-up    .action { transform: translateY(24px) scale(.6); }
+.dir-up.open .action { transform: translateY(0) scale(1); }
+
+.dir-down  .action { transform: translateY(-24px) scale(.6); }
+.dir-down.open .action { transform: translateY(0) scale(1); }
+
+.dir-left  .action { transform: translateX(24px) scale(.6); }
+.dir-left.open .action { transform: translateX(0) scale(1); }
+
+.dir-right .action { transform: translateX(-24px) scale(.6); }
+.dir-right.open .action { transform: translateX(0) scale(1); }
+
+// ── Reduced motion ──────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .action,
+  .fab {
+    transition-duration: 0.01ms !important;
+  }
+}

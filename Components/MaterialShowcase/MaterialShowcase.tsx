@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { AdvancedChip, Button, Card, Carousel, Checkbox, Chip, CircularProgress, DatePicker, FabMenu, Icon, IconButton, LinearProgress, LoadingIndicator, MaterialList, MaterialSlider, NavigationBar, Radio, RangeSlider, SplitButton, Switch, TextField, ThemeToggle, ToggleButton, Toolbar, Tooltip } from "@/Components/UI";
+import { useEffect, useState } from "react";
+import { AdvancedChip, Button, Card, Carousel, Checkbox, Chip, CircularProgress, DatePicker, ExpressiveToggleButton, FabMenu, Icon, IconButton, LinearProgress, LoadingIndicator, MaterialList, MaterialSlider, NavigationBar, Radio, RangeSlider, SplitButton, Switch, TextField, ThemeToggle, ToggleButton, Toolbar, Tooltip } from "@/Components/UI";
 import styles from "./MaterialShowcase.module.scss";
 
 const sections = ["Overview", "Actions", "Selection", "Inputs", "Content", "Navigation", "Feedback", "Pickers"];
@@ -22,6 +22,18 @@ export function MaterialShowcase() {
   const [segment, setSegment] = useState("Week");
   const [favorite, setFavorite] = useState(false);
   const [inputChips, setInputChips] = useState(["React", "SCSS"]);
+  const [linearValue, setLinearValue] = useState(0);
+
+  // Animate LinearProgress value 0 → 1 liên tục để demo transition mượt.
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setLinearValue((current) => {
+        const next = current + 0.01;
+        return next >= 1 ? 0 : next;
+      });
+    }, 80);
+    return () => window.clearInterval(id);
+  }, []);
 
   const toggleChip = (chip: string) => setSelectedChips((current) => current.includes(chip) ? current.filter((item) => item !== chip) : [...current, chip]);
 
@@ -43,7 +55,7 @@ export function MaterialShowcase() {
       <DemoBlock id="actions" index="01" eyebrow="Actions" title="Buttons that respond" description="Clear hierarchy, generous shapes and tactile state layers make every action feel immediate.">
         <div className={styles.demoGroup}><h3>Button variants</h3><div className={styles.row}><Button icon="sparkle">Filled</Button><Button variant="tonal" icon="favorite">Tonal</Button><Button variant="outlined">Outlined</Button><Button variant="text">Text</Button><Button disabled>Disabled</Button></div></div>
         <div className={styles.demoGroup}><h3>Floating action buttons</h3><div className={styles.fabRow}><button className={styles.smallFab}><Icon name="plus" /></button><button className={styles.largeFab}><Icon name="palette" /></button><button className={styles.extendedFab}><Icon name="plus" /> Create new</button></div></div>
-        <div className={styles.actionGrid}><div><h3>Split & toggle buttons</h3><div className={styles.row}><SplitButton label="Create" icon={<Icon name="sparkle" />} menuItems={[{ id: "template", label: "From template", icon: <Icon name="palette" />, trailingText: "T" }, { id: "duplicate", label: "Duplicate current", icon: <Icon name="image" />, trailingText: "D" }, { id: "import", label: "Import file", icon: <Icon name="plus" />, onSelect: () => setSnackbar(true) }]} /><ToggleButton selected={favorite} onChange={setFavorite}>Favorite</ToggleButton><ToggleButton selected={!favorite} onChange={() => setFavorite(!favorite)} variant="outlined" icon="image">Preview</ToggleButton></div></div><div><h3>Icon buttons</h3><div className={styles.row}><Tooltip content="Edit component"><IconButton icon="edit" label="Edit component" /></Tooltip><IconButton icon="favorite" label="Favorite" variant="tonal" selected={favorite} onClick={() => setFavorite(!favorite)} /><IconButton icon="share" label="Share" variant="outlined" /><IconButton icon="more" label="More options" variant="filled" /></div></div><div><h3>FAB menu</h3><FabMenu /></div></div>
+        <div className={styles.actionGrid}><div><h3>Split button</h3><div className={styles.row}><SplitButton label="Create" icon={<Icon name="sparkle" />} menuItems={[{ id: "template", label: "From template", icon: <Icon name="palette" />, trailingText: "T" }, { id: "duplicate", label: "Duplicate current", icon: <Icon name="image" />, trailingText: "D" }, { id: "import", label: "Import file", icon: <Icon name="plus" />, onSelect: () => setSnackbar(true) }]} /><SplitButton label="Disabled" icon={<Icon name="sparkle" />} disabled menuItems={[{ id: "noop", label: "Cannot open", icon: <Icon name="close" /> }]} /></div></div><div><h3>Toggle buttons</h3><div className={styles.row}><ToggleButton selected={favorite} onChange={setFavorite}>Favorite</ToggleButton><ToggleButton selected={!favorite} onChange={() => setFavorite(!favorite)} variant="outlined" icon="image">Preview</ToggleButton><ExpressiveToggleButton defaultSelected icon={<Icon name="sparkle" />}>Default on</ExpressiveToggleButton><ExpressiveToggleButton disabled>Disabled</ExpressiveToggleButton></div></div><div><h3>Icon buttons</h3><div className={styles.row}><Tooltip content="Edit component"><IconButton icon="edit" label="Edit component" /></Tooltip><IconButton icon="favorite" label="Favorite" variant="tonal" selected={favorite} onClick={() => setFavorite(!favorite)} /><IconButton icon="share" label="Share" variant="outlined" /><IconButton icon="more" label="More options" variant="filled" /></div></div><div><h3>FAB menu</h3><FabMenu actions={[{ id: "edit", label: "Edit", icon: "edit", onClick: () => undefined }, { id: "share", label: "Share", icon: "share", onClick: () => undefined }, { id: "delete", label: "Delete", icon: "trash", destructive: true, onClick: () => undefined }]} /></div></div>
       </DemoBlock>
 
       <DemoBlock id="selection" index="02" eyebrow="Selection" title="Choose with confidence" description="Chips and controls communicate state with shape, color and motion instead of relying on labels alone.">
@@ -109,11 +121,11 @@ export function MaterialShowcase() {
                   </div>
                   <div className={styles.progressCard}>
                     <small>Linear standard</small>
-                    <LinearProgress state="indeterminate" appearance="standard" />
+                    <LinearProgress state="determinate" value={linearValue} appearance="standard" />
                   </div>
                   <div className={styles.progressCard}>
                     <small>Linear wave</small>
-                    <LinearProgress state="indeterminate" appearance="wave" />
+                    <LinearProgress state="determinate" value={linearValue} appearance="wave" />
                   </div>
                 </div>
               </section>
