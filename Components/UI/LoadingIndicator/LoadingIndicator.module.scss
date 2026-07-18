@@ -19,7 +19,7 @@
   width: var(--loader-size);
   height: var(--loader-size);
   display: block;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .loader__container {
@@ -28,19 +28,5 @@
 
 .loader__indicator {
   fill: var(--md-sys-color-primary, var(--primary));
-  will-change: d, transform;
-}
-
-.loader--default {
-  .loader__indicator {
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loader__indicator {
-    animation: none;
-    opacity: 1;
-  }
+  will-change: transform;
 }

@@ -264,7 +264,6 @@ export const LoadingIndicator = React.memo<LoadingIndicatorProps>(
         className={[
           styles.loader,
           styles[`loader--${size}`],
-          styles[`loader--${variant}`],
           className,
         ].filter(Boolean).join(" ")}
         role="status"

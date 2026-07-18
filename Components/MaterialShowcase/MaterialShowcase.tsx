@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AdvancedChip, Button, Card, Carousel, Checkbox, Chip, CircularProgress, DatePicker, ExpressiveToggleButton, FabMenu, Icon, IconButton, LinearProgress, LoadingIndicator, MaterialList, MaterialSlider, NavigationBar, Radio, RangeSlider, SplitButton, Switch, TextField, ThemeToggle, ToggleButton, Toolbar, Tooltip } from "@/Components/UI";
 import styles from "./MaterialShowcase.module.scss";
 
-const sections = ["Overview", "Actions", "Selection", "Inputs", "Content", "Navigation", "Feedback", "Pickers"];
+const sections = ["Overview", "Buttons", "Selection", "Inputs", "Content", "Navigation", "Progress", "Loading", "Overlays", "Pickers"];
 
 function DemoBlock({ id, index, eyebrow, title, description, children }: { id: string; index: string; eyebrow: string; title: string; description: string; children: React.ReactNode }) {
   return <section id={id} className={styles.section}><header><span>{index}</span><div><small>{eyebrow}</small><h2>{title}</h2><p>{description}</p></div></header><div className={styles.stage}>{children}</div></section>;
@@ -48,11 +48,11 @@ export function MaterialShowcase() {
 
     <div className={styles.content}>
       <section id="overview" className={styles.hero}>
-        <div className={styles.heroCopy}><div className={styles.pill}><span /> Material Design 3 / UI kit</div><h1>Expressive by<br /><em>design.</em></h1><p>Một thư viện component giàu cá tính, dễ tái sử dụng và chuyển động tự nhiên. Được xây dựng để khám phá, thử nghiệm và mở rộng.</p><div className={styles.heroActions}><Button icon="arrow" onClick={() => document.querySelector("#actions")?.scrollIntoView()}>Explore components</Button><Button variant="outlined" icon="code">View structure</Button></div></div>
+        <div className={styles.heroCopy}><div className={styles.pill}><span /> Material Design 3 / UI kit</div><h1>Expressive by<br /><em>design.</em></h1><p>Một thư viện component giàu cá tính, dễ tái sử dụng và chuyển động tự nhiên. Được xây dựng để khám phá, thử nghiệm và mở rộng.</p><div className={styles.heroActions}><Button icon="arrow" onClick={() => document.querySelector("#buttons")?.scrollIntoView()}>Explore components</Button><Button variant="outlined" icon="code">View structure</Button></div></div>
         <div className={styles.heroVisual}><span className={styles.orbit}><i /><i /><i /></span><div className={styles.floatingCard}><small>YOUR THEME</small><strong>#5F5791</strong><div><span /><span /><span /><span /></div></div><button className={styles.fab} aria-label="Add"><Icon name="plus" /></button></div>
       </section>
 
-      <DemoBlock id="actions" index="01" eyebrow="Actions" title="Buttons that respond" description="Clear hierarchy, generous shapes and tactile state layers make every action feel immediate.">
+      <DemoBlock id="buttons" index="01" eyebrow="Buttons" title="Buttons that respond" description="Clear hierarchy, generous shapes and tactile state layers make every action feel immediate.">
         <div className={styles.demoGroup}><h3>Button variants</h3><div className={styles.row}><Button icon="sparkle">Filled</Button><Button variant="tonal" icon="favorite">Tonal</Button><Button variant="outlined">Outlined</Button><Button variant="text">Text</Button><Button disabled>Disabled</Button></div></div>
         <div className={styles.demoGroup}><h3>Floating action buttons</h3><div className={styles.fabRow}><button className={styles.smallFab}><Icon name="plus" /></button><button className={styles.largeFab}><Icon name="palette" /></button><button className={styles.extendedFab}><Icon name="plus" /> Create new</button></div></div>
         <div className={styles.actionGrid}><div><h3>Split button</h3><div className={styles.row}><SplitButton label="Create" icon={<Icon name="sparkle" />} menuItems={[{ id: "template", label: "From template", icon: <Icon name="palette" />, trailingText: "T" }, { id: "duplicate", label: "Duplicate current", icon: <Icon name="image" />, trailingText: "D" }, { id: "import", label: "Import file", icon: <Icon name="plus" />, onSelect: () => setSnackbar(true) }]} /><SplitButton label="Disabled" icon={<Icon name="sparkle" />} disabled menuItems={[{ id: "noop", label: "Cannot open", icon: <Icon name="close" /> }]} /></div></div><div><h3>Toggle buttons</h3><div className={styles.row}><ToggleButton selected={favorite} onChange={setFavorite}>Favorite</ToggleButton><ToggleButton selected={!favorite} onChange={() => setFavorite(!favorite)} variant="outlined" icon="image">Preview</ToggleButton><ExpressiveToggleButton defaultSelected icon={<Icon name="sparkle" />}>Default on</ExpressiveToggleButton><ExpressiveToggleButton disabled>Disabled</ExpressiveToggleButton></div></div><div><h3>Icon buttons</h3><div className={styles.row}><Tooltip content="Edit component"><IconButton icon="edit" label="Edit component" /></Tooltip><IconButton icon="favorite" label="Favorite" variant="tonal" selected={favorite} onClick={() => setFavorite(!favorite)} /><IconButton icon="share" label="Share" variant="outlined" /><IconButton icon="more" label="More options" variant="filled" /></div></div><div><h3>FAB menu</h3><FabMenu actions={[{ id: "edit", label: "Edit", icon: "edit", onClick: () => undefined }, { id: "share", label: "Share", icon: "share", onClick: () => undefined }, { id: "delete", label: "Delete", icon: "trash", destructive: true, onClick: () => undefined }]} /></div></div>
@@ -81,10 +81,9 @@ export function MaterialShowcase() {
         <div className={styles.demoGroup}><h3>Floating toolbar</h3><Toolbar /></div>
       </DemoBlock>
 
-      <DemoBlock id="feedback" index="06" eyebrow="Feedback" title="Keep people informed" description="Progress and overlays appear at the right moment, explain system status, then get out of the way.">
-        <div className={styles.feedbackGrid}>
-          <div>
-            <h3>Progress & loading indicators</h3>
+      <DemoBlock id="progress" index="06" eyebrow="Progress" title="Keep people informed" description="Progress indicators explain system status and show how much work remains.">
+        <div>
+            <h3>Progress indicators</h3>
             <div className={styles.progressShowcase}>
               <section className={styles.progressSection}>
                 <h4>Standard</h4>
@@ -113,29 +112,53 @@ export function MaterialShowcase() {
                 </div>
               </section>
               <section className={styles.progressSection}>
-                <h4>Other indicators</h4>
-                <div className={styles.progressSupport}>
+                <h4>Linear standard</h4>
+                <div className={styles.progressRow}>
                   <div className={styles.progressCard}>
-                    <small>Loading indicator</small>
-                    <LoadingIndicator />
+                    <small>Linear determinate</small>
+                    <LinearProgress state="determinate" value={0.7} appearance="standard" />
                   </div>
                   <div className={styles.progressCard}>
-                    <small>Linear standard</small>
+                    <small>Linear animated</small>
                     <LinearProgress state="determinate" value={linearValue} appearance="standard" />
                   </div>
+                </div>
+              </section>
+              <section className={styles.progressSection}>
+                <h4>Linear wavy</h4>
+                <div className={styles.progressRow}>
                   <div className={styles.progressCard}>
-                    <small>Linear wave</small>
+                    <small>Linear determinate</small>
+                    <LinearProgress state="determinate" value={0.7} appearance="wave" />
+                  </div>
+                  <div className={styles.progressCard}>
+                    <small>Linear animated</small>
                     <LinearProgress state="determinate" value={linearValue} appearance="wave" />
                   </div>
                 </div>
               </section>
             </div>
-          </div>
-          <div><h3>Overlays</h3><div className={styles.row}><Button variant="tonal" onClick={() => setDialog(true)}>Open dialog</Button><Button variant="outlined" onClick={() => { setSnackbar(true); window.setTimeout(() => setSnackbar(false), 3500); }}>Show snackbar</Button><Tooltip rich content="Rich tooltips can include longer supporting text and an optional action."><Button variant="text">Hover for tooltip</Button></Tooltip></div></div>
         </div>
       </DemoBlock>
 
-      <DemoBlock id="pickers" index="07" eyebrow="Pickers" title="Pick a moment" description="Calendar surfaces keep date selection direct, readable and comfortable across pointer and touch input.">
+      <DemoBlock id="loading" index="07" eyebrow="Loading" title="Loading with character" description="Loading indicators make waiting feel intentional while keeping system status visible.">
+        <div className={styles.progressRow}>
+          <div className={styles.progressCard}>
+            <small>Loading indicator contained</small>
+            <LoadingIndicator variant="contained" />
+          </div>
+          <div className={styles.progressCard}>
+            <small>Loading indicator default</small>
+            <LoadingIndicator variant="default" />
+          </div>
+        </div>
+      </DemoBlock>
+
+      <DemoBlock id="overlays" index="08" eyebrow="Overlays" title="Keep context in reach" description="Dialogs, snackbars and tooltips communicate important feedback without interrupting the task.">
+        <div className={styles.row}><Button variant="tonal" onClick={() => setDialog(true)}>Open dialog</Button><Button variant="outlined" onClick={() => { setSnackbar(true); window.setTimeout(() => setSnackbar(false), 3500); }}>Show snackbar</Button><Tooltip rich content="Rich tooltips can include longer supporting text and an optional action."><Button variant="text">Hover for tooltip</Button></Tooltip></div>
+      </DemoBlock>
+
+      <DemoBlock id="pickers" index="09" eyebrow="Pickers" title="Pick a moment" description="Calendar surfaces keep date selection direct, readable and comfortable across pointer and touch input.">
         <div className={styles.pickerGrid}><DatePicker /><div className={styles.pickerNote}><Icon name="calendar" /><small>Modal date picker</small><h3>Calendar interaction included</h3><p>Select a date to update the header. The reusable component is ready for connection to form state or a date library.</p><Button variant="tonal" icon="arrow">View API</Button></div></div>
       </DemoBlock>
 

@@ -4,7 +4,7 @@
   position: relative;
   width: 100%;
   min-width: 0;
-  height: 12px;
+  height: 14px;
   padding-left: 4px;
   overflow: visible;
   contain: layout paint;
@@ -12,11 +12,11 @@
 }
 
 .rootDeterminate {
-  height: 12px;
+  height: 14px;
 }
 
 .rootWave {
-  height: 12px;
+  height: 14px;
 }
 
 /* ---- Stop indicator (8×8px, primary, radius 3px) — ĐỨNG YÊN ở mép phải ----
@@ -86,12 +86,10 @@
 .activeIndicatorWave {
   top: calc(50% - 6px);
   height: 12px;
-  border-radius: 6px;
   overflow: hidden;
   /* Active wave: trong suốt (không fill nền), SVG con vẽ stroke sine path. */
   background: transparent;
-  /* Bỏ border-radius (stroke path tự bo theo sine). */
-  border-radius: 0;
+  border-radius: 6px;
 }
 
 /* SVG wave bên trong activeIndicator: fill 100% active, preserveAspectRatio none
@@ -113,49 +111,6 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* Wave segment legacy (giữ cho LinearWaveTile fallback nếu có ai dùng) */
-.waveSegment {
-  display: block;
-  width: 40px;
-  height: 12px;
-  flex: 0 0 auto;
-  will-change: transform;
-  transform-origin: center;
-}
-
-.linearWaveSvg {
-  display: block;
-  width: 40px;
-  height: 12px;
-  overflow: visible;
-}
-
-/* Indeterminate wave: width 25% + drift ngang (translateX) + bob nhẹ */
-.activeIndicatorWaveIndeterminate {
-  width: 25% !important;
-  animation: m3-linear-wave-drift 1.6s linear infinite;
-}
-
-.waveStrip {
-  /* legacy: không dùng trong layout mới */
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  height: 12px;
-  width: 100%;
-  flex: 0 0 auto;
-  min-width: 40px;
-  color: var(--md-sys-color-primary, var(--primary));
-}
-
-.waveStripIndeterminate {
-  animation: m3-linear-wave-drift 1.6s linear infinite;
-}
-
-.waveBob {
-  animation: m3-linear-wave-bob 1.6s ease-in-out infinite;
-}
-
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   .activeIndicator,
@@ -164,10 +119,7 @@
     transition: none;
   }
 
-  .activeIndicatorIndeterminate,
-  .activeIndicatorWaveIndeterminate,
-  .waveStripIndeterminate,
-  .waveSegment {
+  .activeIndicatorIndeterminate {
     animation: none;
   }
 }
@@ -183,23 +135,3 @@
   }
 }
 
-@keyframes m3-linear-wave-drift {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-40px);
-  }
-}
-
-@keyframes m3-linear-wave-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-1px);
-  }
-}
