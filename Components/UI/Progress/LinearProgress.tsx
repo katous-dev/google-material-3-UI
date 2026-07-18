@@ -17,7 +17,7 @@ export interface LinearProgressIndicatorProps {
 }
 
 // === Wave shape constants (copy pattern từ Circular determinate) ===
-const WAVE_VIEWBOX_W = 100;
+const WAVE_VIEWBOX_W = 1000;
 const WAVE_VIEWBOX_H = 12;
 const WAVE_AMPLITUDE = 3.5;
 const WAVE_DEG = 50;
@@ -185,7 +185,7 @@ export function LinearProgress({
           >
             <svg
               viewBox={`0 0 ${WAVE_VIEWBOX_W} ${WAVE_VIEWBOX_H}`}
-              preserveAspectRatio="none"
+              preserveAspectRatio="xMinYMid slice"
               xmlns="http://www.w3.org/2000/svg"
               className={styles.waveSvg}
               aria-hidden="true"

@@ -86,6 +86,8 @@
 .activeIndicatorWave {
   top: calc(50% - 6px);
   height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
   /* Active wave: trong suốt (không fill nền), SVG con vẽ stroke sine path. */
   background: transparent;
   /* Bỏ border-radius (stroke path tự bo theo sine). */
