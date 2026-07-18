@@ -84,6 +84,8 @@
    → "sống" như Circular determinate). */
 
 .activeIndicatorWave {
+  top: calc(50% - 6px);
+  height: 12px;
   /* Active wave: trong suốt (không fill nền), SVG con vẽ stroke sine path. */
   background: transparent;
   /* Bỏ border-radius (stroke path tự bo theo sine). */
@@ -102,7 +104,7 @@
 /* Path stroke: primary color, độ dày ~3.4 (bám theo circular STROKE_W). */
 .waveSvgPath {
   stroke: var(--md-sys-color-primary, var(--primary));
-  stroke-width: 3.4;
+  stroke-width: 7;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;

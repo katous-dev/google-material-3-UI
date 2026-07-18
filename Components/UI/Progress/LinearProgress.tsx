@@ -89,6 +89,7 @@ export function LinearProgress({
 }: LinearProgressIndicatorProps) {
   const mode = state ?? variant;
   const clamped = Math.min(100, Math.max(0, value));
+  const waveValue = clamped * 100;
   const isIndeterminate = mode === "indeterminate";
   const isWave = appearance === "wave";
 
@@ -115,7 +116,7 @@ export function LinearProgress({
     prevTsRef.current = 0;
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const target = isIndeterminate ? 75 : clamped;
+      const target = isIndeterminate ? 75 : waveValue;
       el.setAttribute("d", waveLinearPath(target, target));
       return;
     }
@@ -138,7 +139,7 @@ export function LinearProgress({
       return () => cancelAnimationFrame(rafRef.current);
     }
 
-    const targetSweep = clamped;
+    const targetSweep = waveValue;
     const tick = (ts: number) => {
       const dt = prevTsRef.current ? Math.min((ts - prevTsRef.current) / 1000, 0.05) : 0.016;
       prevTsRef.current = ts;
@@ -160,7 +161,7 @@ export function LinearProgress({
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [isWave, isIndeterminate, clamped]);
+  }, [isWave, isIndeterminate, clamped, waveValue]);
 
   // === Layout: 3 absolute children GIỐNG Standard ===
   const GAP_PX = 4;
