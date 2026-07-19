@@ -1,2 +1,120 @@
-@use "../motion" as motion;
-.wrap { display: grid; gap: 14px; }.carousel { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-block: 6px; button { min-width: 90px; height: 190px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; border: 0; color: var(--on-primary-container); text-align: left; cursor: pointer; @include motion.pressable(1.015, .97, 28px, 36px, 18px); transition-property: flex, min-width, border-radius, transform, box-shadow; transition-duration: 450ms, 450ms, 360ms, 360ms, 180ms; span { font-size: 10px; font-weight: 800; } strong { max-width: 150px; font-size: 18px; line-height: 1.15; opacity: 0; transform: translateY(8px); transition: .3s; } }.active { min-width: min(58vw, 290px); border-radius: 28px 60px 28px 28px; strong { opacity: 1; transform: none; } } }.dots { display: flex; justify-content: center; gap: 6px; button { width: 7px; height: 7px; padding: 0; border: 0; background: var(--outline-variant); cursor: pointer; @include motion.pressable(1.18, .82, 5px, 8px, 3px); transition-property: width, transform, border-radius, background; } .dotActive { width: 24px; background: var(--primary); } }
+.carousel {
+  --carousel-height: 220px;
+  --carousel-item-height: 204px;
+  --carousel-gap: 8px;
+  --carousel-padding-inline: 16px;
+
+  box-sizing: border-box;
+  width: min(100%, 600px);
+  height: var(--carousel-height);
+  padding: 8px var(--carousel-padding-inline);
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  cursor: grab;
+}
+
+.carouselDragging {
+  cursor: grabbing;
+}
+
+.track {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--carousel-gap);
+  width: 100%;
+  height: var(--carousel-item-height);
+  transition: transform 360ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.item {
+  position: relative;
+  box-sizing: border-box;
+  min-width: var(--carousel-min-item-width, 56px);
+  height: var(--carousel-item-height);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 28px;
+  background: transparent;
+  cursor: pointer;
+  transition: flex-basis 360ms cubic-bezier(.2, .8, .2, 1), transform 280ms ease, box-shadow 280ms ease;
+}
+
+.item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgb(0 0 0 / .14);
+}
+
+.item:active {
+  transform: translateY(0) scale(.98);
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / .18), transparent 48%),
+    linear-gradient(45deg, rgb(103 80 164 / .12), transparent 58%),
+    #ece6f0;
+  background-blend-mode: luminosity, normal, normal;
+}
+
+.text,
+.index {
+  position: absolute;
+  z-index: 1;
+  color: var(--on-surface-variant);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.text {
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.index {
+  top: 14px;
+  left: 16px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.carousel--with-text .text,
+.carousel--with-text .index {
+  opacity: 1;
+}
+
+.carousel--uniform .item {
+  flex-grow: 1;
+}
+
+.carousel--mobile {
+  --carousel-height: 184px;
+  --carousel-item-height: 168px;
+  --carousel-padding-inline: 12px;
+  width: 100%;
+}
+
+.carousel--mobile .item {
+  min-width: min(var(--carousel-min-item-width, 48px), 144px);
+}
+
+.item:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .item,
+  .text,
+  .index {
+    transition: none;
+  }
+}

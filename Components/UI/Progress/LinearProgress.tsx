@@ -29,7 +29,7 @@ const GROW_K = 60;
 const GROW_D = 16;
 const WAVE_PHASE_DEG_S = 150;
 
-function waveLinearPath(activeLenPct: number, sweep: number, phaseOffsetDeg = 0): string {
+function waveLinearPath(sweep: number, phaseOffsetDeg = 0): string {
   const filledPct = Math.max(0, Math.min(100, sweep));
   if (filledPct < 0.5) return "";
   const filledLen = WAVE_VIEWBOX_W * (filledPct / 100);
@@ -67,16 +67,6 @@ function catmullRom(pts: [number, number][]): string {
   return d;
 }
 
-function LinearWaveTile({ delay }: { delay: number }) {
-  return (
-    <span className={styles.waveSegment} style={{ animationDelay: `${delay}ms` }}>
-      <svg className={styles.linearWaveSvg} viewBox="0 0 48 12" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M6.05859 3.57003C4.16427 2.43344 1.70723 3.0477 0.570641 4.94202C-0.565952 6.83634 0.0483055 9.29338 1.94263 10.43L4.00061 7L6.05859 3.57003ZM24.0006 7L21.9426 3.57003C17.0542 6.50311 10.9471 6.50311 6.05859 3.57003L4.00061 7L1.94263 10.43C9.36456 14.8831 18.6367 14.8831 26.0586 10.43L24.0006 7ZM24.0006 7L26.0586 10.43C30.9471 7.49689 37.0542 7.49689 41.9426 10.43L44.0006 7L46.0586 3.57003C38.6367 -0.883127 29.3646 -0.883127 21.9426 3.57003L24.0006 7Z" fill="currentColor" />
-      </svg>
-    </span>
-  );
-}
-
 export function LinearProgress({
   variant = "determinate",
   state,
@@ -88,7 +78,7 @@ export function LinearProgress({
   style,
 }: LinearProgressIndicatorProps) {
   const mode = state ?? variant;
-  const clamped = Math.min(100, Math.max(0, value));
+  const clamped = Math.min(1, Math.max(0, value));
   const waveValue = clamped * 100;
   const isIndeterminate = mode === "indeterminate";
   const isWave = appearance === "wave";
@@ -117,7 +107,7 @@ export function LinearProgress({
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const target = isIndeterminate ? 75 : waveValue;
-      el.setAttribute("d", waveLinearPath(target, target));
+      el.setAttribute("d", waveLinearPath(target));
       return;
     }
 
@@ -132,7 +122,7 @@ export function LinearProgress({
         const sweep = MIN_SWEEP + (MAX_SWEEP - MIN_SWEEP) * p;
         phaseRef.current = (phaseRef.current + WAVE_PHASE_DEG_S * dt) % (WAVE_DEG * 2);
 
-        el.setAttribute("d", waveLinearPath(100, sweep, phaseRef.current));
+        el.setAttribute("d", waveLinearPath(sweep, phaseRef.current));
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
@@ -150,7 +140,7 @@ export function LinearProgress({
       sweepRef.current = Math.max(0, sweepRef.current);
       phaseRef.current = (phaseRef.current + WAVE_PHASE_DEG_S * dt) % (WAVE_DEG * 2);
 
-      el.setAttribute("d", waveLinearPath(100, sweepRef.current, phaseRef.current));
+      el.setAttribute("d", waveLinearPath(sweepRef.current, phaseRef.current));
       rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -172,7 +162,7 @@ export function LinearProgress({
     <div
       className={rootClass}
       role="progressbar"
-      aria-valuenow={!isIndeterminate ? clamped : undefined}
+      aria-valuenow={!isIndeterminate ? clamped * 100 : undefined}
       aria-valuemin={0}
       aria-valuemax={100}
       style={style}
@@ -180,7 +170,11 @@ export function LinearProgress({
       {isWave ? (
         <>
           <div
-            className={[styles.activeIndicator, styles.activeIndicatorWave].filter(Boolean).join(" ")}
+            className={[
+              styles.activeIndicator,
+              styles.activeIndicatorWave,
+              isIndeterminate && styles.activeIndicatorIndeterminate,
+            ].filter(Boolean).join(" ")}
             style={isIndeterminate ? undefined : { width: activeWidthStyle }}
           >
             <svg
