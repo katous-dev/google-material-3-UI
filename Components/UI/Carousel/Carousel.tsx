@@ -1,6 +1,6 @@
 "use client";
 
-import { PointerEvent, type CSSProperties, useRef, useState } from "react";
+import { type CSSProperties, type KeyboardEvent, type PointerEvent, useRef, useState } from "react";
 import styles from "./Carousel.module.scss";
 
 export type CarouselLayout = "uniform" | "non-uniform";
@@ -55,7 +55,7 @@ export function Carousel({
 
   const count = Math.max(1, Math.min(items.length, Math.round(visibleItems)));
   const maxStart = Math.max(0, items.length - count);
-  const previewCount = dragging && dragOffset < 0 ? count + 1 : count;
+  const previewCount = dragOffset < -4 ? count + 2 : count;
   const visible = items.slice(startIndex, startIndex + previewCount);
   const dragProgress = Math.min(1, Math.abs(dragOffset) / 180);
 
@@ -63,7 +63,8 @@ export function Carousel({
     if (layout === "uniform") return 1;
     if (index === 0) return 2.4 * (dragOffset < 0 ? 1 - dragProgress : 1);
     if (index === 1) return 1.7;
-    return 0.9;
+    if (index === 2) return 0.75;
+    return 0.45;
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -96,6 +97,13 @@ export function Carousel({
     }
   };
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    event.preventDefault();
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    setStartIndex((current) => Math.max(0, Math.min(maxStart, current + direction)));
+  };
+
   return (
     <div
       className={[
@@ -108,6 +116,7 @@ export function Carousel({
       ].filter(Boolean).join(" ")}
       role="region"
       aria-label="Carousel"
+      aria-roledescription="carousel"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={finishDrag}
@@ -117,7 +126,7 @@ export function Carousel({
         className={styles.track}
         style={{
           transform: `translateX(${dragOffset}px)`,
-          transition: dragging ? "none" : undefined,
+          transition: "none",
           "--carousel-min-item-width": `${minItemWidth}px`,
         } as CSSProperties}
       >
@@ -127,7 +136,11 @@ export function Carousel({
             type="button"
             className={styles.item}
             style={{ flex: `${weightFor(index)} 1 0` }}
-            aria-label={item.title}
+            aria-label={`${item.title}, item ${startIndex + index + 1} of ${items.length}`}
+            aria-posinset={startIndex + index + 1}
+            aria-setsize={items.length}
+            tabIndex={index < count ? 0 : -1}
+            onKeyDown={handleKeyDown}
             onClick={(event) => event.stopPropagation()}
           >
             <span
